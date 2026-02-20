@@ -1,3 +1,4 @@
+# assignment2.py
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,14 +16,10 @@ from sklearn.metrics import (
 )
 from sklearn.preprocessing import StandardScaler
 
-# ===============================
-# LOAD DATA
-# ===============================
-df = pd.read_csv("heart_disease_uci(1).csv")
 
-# ===============================
-# DATA CLEANING
-# ===============================
+# Load data
+
+df = pd.read_csv("heart_disease_uci(1).csv")
 
 # Drop columns with too many missing values
 df = df.drop(columns=["ca", "thal"])
@@ -33,11 +30,8 @@ df = df.dropna()
 # One-hot encode categorical variables
 df = pd.get_dummies(df, drop_first=True)
 
-# ===============================
-# ===============================
+
 # PART A — REGRESSION (ElasticNet)
-# ===============================
-# ===============================
 
 X = df.drop("num", axis=1)
 y = df["num"]
@@ -72,15 +66,14 @@ plt.title("ElasticNet R2 Heatmap")
 plt.xlabel("Alpha")
 plt.ylabel("L1 Ratio")
 plt.tight_layout()
-plt.show()
+plt.savefig("elasticnet_r2_heatmap.png", dpi=300)
+plt.close()  
 
-# ===============================
-# ===============================
+
 # PART B — CLASSIFICATION
-# ===============================
-# ===============================
 
-# Convert to binary
+
+# Convert to binary classification
 df["num"] = df["num"].apply(lambda x: 1 if x > 0 else 0)
 
 X = df.drop("num", axis=1)
@@ -92,34 +85,32 @@ X_train, X_test, y_train, y_test = train_test_split(
     X_scaled, y, test_size=0.2, random_state=42
 )
 
-# -------------------------------
+
 # Logistic Regression
-# -------------------------------
+
 log_model = LogisticRegression(max_iter=1000)
 log_model.fit(X_train, y_train)
 log_probs = log_model.predict_proba(X_test)[:, 1]
 
 log_auroc = roc_auc_score(y_test, log_probs)
-
 precision, recall, _ = precision_recall_curve(y_test, log_probs)
 log_auprc = auc(recall, precision)
 
 # ROC Curve
 fpr, tpr, _ = roc_curve(y_test, log_probs)
-
 plt.figure(figsize=(6,5))
-plt.plot(fpr, tpr, label=f"Logistic (AUC = {log_auroc:.2f})")
-plt.plot([0,1],[0,1], linestyle="--", label="Random Chance")
+plt.plot(fpr, tpr, label=f"Logistic (AUROC = {log_auroc:.2f})")
+plt.plot([0,1], [0,1], linestyle="--", label="Random Chance")
 plt.xlabel("False Positive Rate")
 plt.ylabel("True Positive Rate")
 plt.title("Logistic Regression ROC Curve")
 plt.legend()
 plt.tight_layout()
-plt.show()
+plt.savefig("logistic_roc_curve.png", dpi=300)
+plt.close()
 
 # PR Curve
 baseline = sum(y_test)/len(y_test)
-
 plt.figure(figsize=(6,5))
 plt.plot(recall, precision, label=f"Logistic (AUPRC = {log_auprc:.2f})")
 plt.hlines(baseline, 0, 1, linestyles="--", label="Random Chance")
@@ -128,12 +119,12 @@ plt.ylabel("Precision")
 plt.title("Logistic Regression PR Curve")
 plt.legend()
 plt.tight_layout()
-plt.show()
+plt.savefig("logistic_pr_curve.png", dpi=300)
+plt.close()
 
-# -------------------------------
-# kNN
-# -------------------------------
-neighbors = [3,5,7,9]
+# k-Nearest Neighbors
+
+neighbors = [3, 5, 7, 9]
 best_k = None
 best_score = 0
 
@@ -142,7 +133,6 @@ for k in neighbors:
     knn.fit(X_train, y_train)
     probs = knn.predict_proba(X_test)[:, 1]
     score = roc_auc_score(y_test, probs)
-
     if score > best_score:
         best_score = score
         best_k = k
@@ -157,16 +147,16 @@ knn_auprc = auc(recall, precision)
 
 # ROC Curve
 fpr, tpr, _ = roc_curve(y_test, knn_probs)
-
 plt.figure(figsize=(6,5))
-plt.plot(fpr, tpr, label=f"kNN (AUC = {knn_auroc:.2f})")
-plt.plot([0,1],[0,1], linestyle="--", label="Random Chance")
+plt.plot(fpr, tpr, label=f"kNN (AUROC = {knn_auroc:.2f})")
+plt.plot([0,1], [0,1], linestyle="--", label="Random Chance")
 plt.xlabel("False Positive Rate")
 plt.ylabel("True Positive Rate")
 plt.title("kNN ROC Curve")
 plt.legend()
 plt.tight_layout()
-plt.show()
+plt.savefig("knn_roc_curve.png", dpi=300)
+plt.close()
 
 # PR Curve
 plt.figure(figsize=(6,5))
@@ -177,10 +167,13 @@ plt.ylabel("Precision")
 plt.title("kNN PR Curve")
 plt.legend()
 plt.tight_layout()
-plt.show()
+plt.savefig("knn_pr_curve.png", dpi=300)
+plt.close()
 
-print("\nFinal Metrics:")
-print("Logistic AUROC:", log_auroc)
-print("Logistic AUPRC:", log_auprc)
-print("kNN AUROC:", knn_auroc)
-print("kNN AUPRC:", knn_auprc)
+
+# Print final metrics
+
+print("Final Metrics:")
+print(f"Logistic Regression: AUROC = {log_auroc:.2f}, AUPRC = {log_auprc:.2f}")
+print(f"kNN: AUROC = {knn_auroc:.2f}, AUPRC = {knn_auprc:.2f}")
+print(f"Best k for kNN: {best_k}")
