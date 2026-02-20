@@ -1,54 +1,33 @@
-# assignment2.py
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import ElasticNet, LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import (
-    r2_score,
-    roc_auc_score,
-    roc_curve,
-    precision_recall_curve,
-    auc
-)
+from sklearn.metrics import r2_score, roc_auc_score, roc_curve, precision_recall_curve, auc
 from sklearn.preprocessing import StandardScaler
 
-<<<<<<< HEAD
-
-# Load data
-
-df = pd.read_csv("heart_disease_uci(1).csv")
-=======
-
+# =====================
+# Load Data
+# =====================
 df = pd.read_csv("heart_disease_uci(1).csv")
 
+# Drop problematic columns if they exist
+for col in ["ca", "thal"]:
+    if col in df.columns:
+        df = df.drop(columns=[col])
 
->>>>>>> 7fe4ae1825cf8d1f05803a9c33bb98d30c29ece3
-
-# Drop columns with too many missing values
-df = df.drop(columns=["ca", "thal"])
-
-# Drop remaining missing rows
 df = df.dropna()
 
-# One-hot encode categorical variables
+# One hot encoding
 df = pd.get_dummies(df, drop_first=True)
 
-<<<<<<< HEAD
-
-# PART A — REGRESSION (ElasticNet)
-=======
-# PART A — REGRESSION (ElasticNet)
-
->>>>>>> 7fe4ae1825cf8d1f05803a9c33bb98d30c29ece3
-
+# =====================
+# PART A: ElasticNet
+# =====================
 X = df.drop("num", axis=1)
 y = df["num"]
 
-# Scale features
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
@@ -59,7 +38,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 alphas = [0.01, 0.1, 1, 10]
 l1_ratios = [0.1, 0.5, 0.9]
 
-results = []
+best_r2 = -999
 
 for a in alphas:
     for l in l1_ratios:
@@ -67,31 +46,14 @@ for a in alphas:
         model.fit(X_train, y_train)
         preds = model.predict(X_test)
         r2 = r2_score(y_test, preds)
-        results.append([a, l, r2])
+        if r2 > best_r2:
+            best_r2 = r2
 
-results_df = pd.DataFrame(results, columns=["alpha", "l1_ratio", "R2"])
-pivot = results_df.pivot(index="l1_ratio", columns="alpha", values="R2")
+print("Best ElasticNet R2:", best_r2)
 
-plt.figure(figsize=(8,6))
-sns.heatmap(pivot, annot=True, fmt=".2f", cmap="viridis")
-plt.title("ElasticNet R2 Heatmap")
-plt.xlabel("Alpha")
-plt.ylabel("L1 Ratio")
-plt.tight_layout()
-plt.savefig("elasticnet_r2_heatmap.png", dpi=300)
-plt.close()  
-
-
-<<<<<<< HEAD
-# PART B — CLASSIFICATION
-=======
-
-# PART B — CLASSIFICATION
-
->>>>>>> 7fe4ae1825cf8d1f05803a9c33bb98d30c29ece3
-
-
-# Convert to binary classification
+# =====================
+# PART B: Classification
+# =====================
 df["num"] = df["num"].apply(lambda x: 1 if x > 0 else 0)
 
 X = df.drop("num", axis=1)
@@ -103,9 +65,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     X_scaled, y, test_size=0.2, random_state=42
 )
 
-
 # Logistic Regression
-
 log_model = LogisticRegression(max_iter=1000)
 log_model.fit(X_train, y_train)
 log_probs = log_model.predict_proba(X_test)[:, 1]
@@ -114,42 +74,11 @@ log_auroc = roc_auc_score(y_test, log_probs)
 precision, recall, _ = precision_recall_curve(y_test, log_probs)
 log_auprc = auc(recall, precision)
 
-# ROC Curve
-fpr, tpr, _ = roc_curve(y_test, log_probs)
-plt.figure(figsize=(6,5))
-plt.plot(fpr, tpr, label=f"Logistic (AUROC = {log_auroc:.2f})")
-plt.plot([0,1], [0,1], linestyle="--", label="Random Chance")
-plt.xlabel("False Positive Rate")
-plt.ylabel("True Positive Rate")
-plt.title("Logistic Regression ROC Curve")
-plt.legend()
-plt.tight_layout()
-plt.savefig("logistic_roc_curve.png", dpi=300)
-plt.close()
-
-# PR Curve
-baseline = sum(y_test)/len(y_test)
-plt.figure(figsize=(6,5))
-plt.plot(recall, precision, label=f"Logistic (AUPRC = {log_auprc:.2f})")
-plt.hlines(baseline, 0, 1, linestyles="--", label="Random Chance")
-plt.xlabel("Recall")
-plt.ylabel("Precision")
-plt.title("Logistic Regression PR Curve")
-plt.legend()
-plt.tight_layout()
-plt.savefig("logistic_pr_curve.png", dpi=300)
-plt.close()
-
-<<<<<<< HEAD
-# k-Nearest Neighbors
-
-neighbors = [3, 5, 7, 9]
-=======
+print("Logistic AUROC:", log_auroc)
+print("Logistic AUPRC:", log_auprc)
 
 # kNN
-
-neighbors = [3,5,7,9]
->>>>>>> 7fe4ae1825cf8d1f05803a9c33bb98d30c29ece3
+neighbors = [3, 5, 7, 9]
 best_k = None
 best_score = 0
 
@@ -162,51 +91,5 @@ for k in neighbors:
         best_score = score
         best_k = k
 
-knn = KNeighborsClassifier(n_neighbors=best_k)
-knn.fit(X_train, y_train)
-knn_probs = knn.predict_proba(X_test)[:, 1]
-
-knn_auroc = roc_auc_score(y_test, knn_probs)
-precision, recall, _ = precision_recall_curve(y_test, knn_probs)
-knn_auprc = auc(recall, precision)
-
-# ROC Curve
-fpr, tpr, _ = roc_curve(y_test, knn_probs)
-plt.figure(figsize=(6,5))
-plt.plot(fpr, tpr, label=f"kNN (AUROC = {knn_auroc:.2f})")
-plt.plot([0,1], [0,1], linestyle="--", label="Random Chance")
-plt.xlabel("False Positive Rate")
-plt.ylabel("True Positive Rate")
-plt.title("kNN ROC Curve")
-plt.legend()
-plt.tight_layout()
-plt.savefig("knn_roc_curve.png", dpi=300)
-plt.close()
-
-# PR Curve
-plt.figure(figsize=(6,5))
-plt.plot(recall, precision, label=f"kNN (AUPRC = {knn_auprc:.2f})")
-plt.hlines(baseline, 0, 1, linestyles="--", label="Random Chance")
-plt.xlabel("Recall")
-plt.ylabel("Precision")
-plt.title("kNN PR Curve")
-plt.legend()
-plt.tight_layout()
-plt.savefig("knn_pr_curve.png", dpi=300)
-plt.close()
-
-<<<<<<< HEAD
-
-# Print final metrics
-
-print("Final Metrics:")
-print(f"Logistic Regression: AUROC = {log_auroc:.2f}, AUPRC = {log_auprc:.2f}")
-print(f"kNN: AUROC = {knn_auroc:.2f}, AUPRC = {knn_auprc:.2f}")
-print(f"Best k for kNN: {best_k}")
-=======
-print("\nFinal Metrics:")
-print("Logistic AUROC:", log_auroc)
-print("Logistic AUPRC:", log_auprc)
-print("kNN AUROC:", knn_auroc)
-print("kNN AUPRC:", knn_auprc)
->>>>>>> 7fe4ae1825cf8d1f05803a9c33bb98d30c29ece3
+print("Best k:", best_k)
+print("kNN AUROC:", best_score)
