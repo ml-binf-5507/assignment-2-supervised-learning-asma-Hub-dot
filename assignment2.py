@@ -16,10 +16,17 @@ from sklearn.metrics import (
 )
 from sklearn.preprocessing import StandardScaler
 
+<<<<<<< HEAD
 
 # Load data
 
 df = pd.read_csv("heart_disease_uci(1).csv")
+=======
+
+df = pd.read_csv("heart_disease_uci(1).csv")
+
+
+>>>>>>> 7fe4ae1825cf8d1f05803a9c33bb98d30c29ece3
 
 # Drop columns with too many missing values
 df = df.drop(columns=["ca", "thal"])
@@ -30,8 +37,13 @@ df = df.dropna()
 # One-hot encode categorical variables
 df = pd.get_dummies(df, drop_first=True)
 
+<<<<<<< HEAD
 
 # PART A — REGRESSION (ElasticNet)
+=======
+# PART A — REGRESSION (ElasticNet)
+
+>>>>>>> 7fe4ae1825cf8d1f05803a9c33bb98d30c29ece3
 
 X = df.drop("num", axis=1)
 y = df["num"]
@@ -70,7 +82,13 @@ plt.savefig("elasticnet_r2_heatmap.png", dpi=300)
 plt.close()  
 
 
+<<<<<<< HEAD
 # PART B — CLASSIFICATION
+=======
+
+# PART B — CLASSIFICATION
+
+>>>>>>> 7fe4ae1825cf8d1f05803a9c33bb98d30c29ece3
 
 
 # Convert to binary classification
@@ -122,9 +140,16 @@ plt.tight_layout()
 plt.savefig("logistic_pr_curve.png", dpi=300)
 plt.close()
 
+<<<<<<< HEAD
 # k-Nearest Neighbors
 
 neighbors = [3, 5, 7, 9]
+=======
+
+# kNN
+
+neighbors = [3,5,7,9]
+>>>>>>> 7fe4ae1825cf8d1f05803a9c33bb98d30c29ece3
 best_k = None
 best_score = 0
 
@@ -170,6 +195,7 @@ plt.tight_layout()
 plt.savefig("knn_pr_curve.png", dpi=300)
 plt.close()
 
+<<<<<<< HEAD
 
 # Print final metrics
 
@@ -177,3 +203,10 @@ print("Final Metrics:")
 print(f"Logistic Regression: AUROC = {log_auroc:.2f}, AUPRC = {log_auprc:.2f}")
 print(f"kNN: AUROC = {knn_auroc:.2f}, AUPRC = {knn_auprc:.2f}")
 print(f"Best k for kNN: {best_k}")
+=======
+print("\nFinal Metrics:")
+print("Logistic AUROC:", log_auroc)
+print("Logistic AUPRC:", log_auprc)
+print("kNN AUROC:", knn_auroc)
+print("kNN AUPRC:", knn_auprc)
+>>>>>>> 7fe4ae1825cf8d1f05803a9c33bb98d30c29ece3
