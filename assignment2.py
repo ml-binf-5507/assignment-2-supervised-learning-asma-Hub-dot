@@ -7,9 +7,9 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import r2_score, roc_auc_score, roc_curve, precision_recall_curve, auc
 from sklearn.preprocessing import StandardScaler
 
-# =====================
+
 # Load Data
-# =====================
+
 df = pd.read_csv("heart_disease_uci(1).csv")
 
 # Drop problematic columns if they exist
@@ -22,9 +22,9 @@ df = df.dropna()
 # One hot encoding
 df = pd.get_dummies(df, drop_first=True)
 
-# =====================
+
 # PART A: ElasticNet
-# =====================
+
 X = df.drop("num", axis=1)
 y = df["num"]
 
@@ -51,9 +51,9 @@ for a in alphas:
 
 print("Best ElasticNet R2:", best_r2)
 
-# =====================
+
 # PART B: Classification
-# =====================
+
 df["num"] = df["num"].apply(lambda x: 1 if x > 0 else 0)
 
 X = df.drop("num", axis=1)
