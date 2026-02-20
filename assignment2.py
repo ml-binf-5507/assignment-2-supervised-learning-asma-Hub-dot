@@ -15,14 +15,10 @@ from sklearn.metrics import (
 )
 from sklearn.preprocessing import StandardScaler
 
-# ===============================
-# LOAD DATA
-# ===============================
+
 df = pd.read_csv("heart_disease_uci(1).csv")
 
-# ===============================
-# DATA CLEANING
-# ===============================
+
 
 # Drop columns with too many missing values
 df = df.drop(columns=["ca", "thal"])
@@ -33,11 +29,8 @@ df = df.dropna()
 # One-hot encode categorical variables
 df = pd.get_dummies(df, drop_first=True)
 
-# ===============================
-# ===============================
 # PART A — REGRESSION (ElasticNet)
-# ===============================
-# ===============================
+
 
 X = df.drop("num", axis=1)
 y = df["num"]
@@ -74,11 +67,9 @@ plt.ylabel("L1 Ratio")
 plt.tight_layout()
 plt.show()
 
-# ===============================
-# ===============================
+
 # PART B — CLASSIFICATION
-# ===============================
-# ===============================
+
 
 # Convert to binary
 df["num"] = df["num"].apply(lambda x: 1 if x > 0 else 0)
@@ -92,9 +83,9 @@ X_train, X_test, y_train, y_test = train_test_split(
     X_scaled, y, test_size=0.2, random_state=42
 )
 
-# -------------------------------
+
 # Logistic Regression
-# -------------------------------
+
 log_model = LogisticRegression(max_iter=1000)
 log_model.fit(X_train, y_train)
 log_probs = log_model.predict_proba(X_test)[:, 1]
@@ -130,9 +121,9 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 
-# -------------------------------
+
 # kNN
-# -------------------------------
+
 neighbors = [3,5,7,9]
 best_k = None
 best_score = 0
