@@ -10,32 +10,49 @@ def load_data(filepath):
     return pd.read_csv(filepath)
 
 
+def preprocess_data(df):
+    X = df.drop("num", axis=1)
+    y = df["num"]
+
+    X = pd.get_dummies(X, drop_first=True)
+
+    return X, y
+
+
+# Regression
 def prepare_regression_data(df, target_column):
     """
     Prepare X and y for regression.
     """
-    X = df.drop(columns=[target_column], errors="ignore")
+
+    if target_column not in df.columns:
+        raise ValueError("Target column not found.")
+
     y = df[target_column]
+
+    # Drop only the target column
+    X = df.drop(columns=[target_column])
+
     return X, y
 
 
+# Classification
 def prepare_classification_data(df, target_column):
     """
     Prepare X and y for classification.
 
     - Converts target to binary (0 = no disease, 1 = disease)
     - Drops the 'chol' column as required by tests
-    - Handles incorrect target name automatically
     """
 
-    # If wrong target name passed (like "target"), use "num"
     if target_column not in df.columns:
-        target_column = "num"
+        if "num" in df.columns:
+            target_column = "num"
+        else:
+            raise ValueError("No valid target column found.")
 
-    # Convert to binary classification
     y = df[target_column].apply(lambda x: 1 if x > 0 else 0)
 
-    # Drop target and 'chol'
     X = df.drop(columns=[target_column, "chol"], errors="ignore")
 
     return X, y
@@ -43,13 +60,15 @@ def prepare_classification_data(df, target_column):
 
 def split_and_scale(X, y, test_size=0.2, random_state=42):
     """
-    Split data into train/test and apply standard scaling.
+    Split data into train/test and apply scaling.
     """
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
+        X,
+        y,
         test_size=test_size,
-        random_state=random_state
+        random_state=random_state,
+        stratify=y if len(set(y)) > 1 else None
     )
 
     scaler = StandardScaler()
